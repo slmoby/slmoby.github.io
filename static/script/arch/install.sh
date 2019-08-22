@@ -133,7 +133,7 @@ install(){
         fi
         sed -i 's/#Server/Server/g' /etc/pacman.d/mirrorlist.new
         rm -f rankmirrors.sh
-        wget https://www.slmoby.top/script/arch/rankmirrors.sh
+        wget https://www.slmoby.top/static/script/arch/rankmirrors.sh
         bash rankmirrors.sh -n 3 /etc/pacman.d/mirrorlist.new > /etc/pacman.d/mirrorlist
         chmod +r /etc/pacman.d/mirrorlist
 	break
@@ -151,7 +151,7 @@ done
 
 config(){
     rm -rf /mnt/root/config.sh
-    wget https://www.slmoby.top/script/arch/config.sh -O /mnt/root/config.sh
+    wget https://www.slmoby.top/static/script/arch/config.sh -O /mnt/root/config.sh
     chmod +x /mnt/root/config.sh
     arch-chroot /mnt /root/config.sh $ROOT $boot
 }
