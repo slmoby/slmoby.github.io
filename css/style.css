@@ -1,0 +1,22 @@
+html {
+	max-width: 1050px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 30px;
+	color: 	#BBFFFF;
+	padding-bottom: 200px;
+	background-color: 	#262626;
+	 }
+
+a {color: royalblue; }
+a:hover {color: lightblue; }
+
+.entry {
+	border-left: 10px solid darkslategray;
+	padding: 0px 10px 0px 10px;
+	border-radius: 0 30px 30px 0;
+	margin-bottom: 20px;
+	background-color: #8B8B83;
+	}
+
+.entry h2 { margin: 5px auto 2px auto; }
