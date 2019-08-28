@@ -1,0 +1,144 @@
+<html>
+<head>
+<title>Chris's Blog</title>
+<!-- Website Icon-->
+<link rel="icon" type="image/x-icon" href="../static/images/favicon.ico"/>
+<meta charset="utf-8"/>
+<!-- Load Script -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/monokai.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<link href="https://cdn.bootcss.com/highlight.js/9.12.0/styles/monokai.min.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/languages/django.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/languages/vim.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/languages/gradle.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/languages/tex.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+<!-- load script done-->
+<link rel='stylesheet' type='text/css' href='../css/style.css'>
+</head>
+
+<h1>Programs and Equipment I Use</h1>
+
+<p>After many requests, here are the programs I use for everything. I'm only putting here programs I consider tried and true and have used for a while.</p>
+
+<p>A lot of people ask about my server configuration and what I do for my website.
+This website is simply hosted on a Github Pages.
+For those looking to start their own real web presence, I recommend renting a VPS rather than buying an old-school host package as the latter tends to be very limited.
+With a VPS, you are free to host multiple sites, install what you want, and really act as if it's a real physical server.
+</p>
+
+
+
+<h2>Software I Use</h2>
+
+<h3>Priorities</h3>
+
+<p>I'm about getting things done quickly and having as little space between my thoughts and actions on the computer.</p>
+
+
+<p>I like having vim-like bindings and prefer running programs in the terminal for simplicity's sake. That said, I'm very much against the cringey meme that things in the terminal are "cooler" or "nerdier" XD. Terminals are good for most tasks, but useless for others, for example, browsing the modern web (I admit this unfortunate fact with much consternation) or looking at maps or images or modifying videos by Facebook.
+I do do some image/video editing with <code>imagemagick</code>/<code>ffmpeg</code>, but only simple, repetitive tasks.
+</p>
+
+
+<dt>Operating System/Distribution</dt>
+<dd>My preferred distro is <a href="https://gentoo.org">Gentoo GNU/Linux</a>. This includes the ThinkPad X220 that I drawing most of my picture on.
+Linux distributions are generally not distinct enough to have strong feelings about, hence the reason I only rarely care to talk about them.
+</dd>
+
+<dt>Terminal</dt>
+<dd> I use st (simple terminal) by <a target="_blank" href="https://suckless.org">suckless.org</a>, which is one of the most minimal, yet easily customizable terminal emulators out there.
+
+<dt>Window Manager/Desktop Environment</dt>
+<dd><a target="_blank" href="http://dwm.suckless.org/">dwm</a>. Dwm Yes!.</dd>
+
+<dt>Fonts</dt>
+<dd>My monospace font is typically Inconsolata, my serif font in Linux Libertine and my sans font is Linux Biolinum. These are the default fonts in <a target="_blank" href="https://github.com/slmoby/gentoo-rice"> gentoo-rice</a> as well. I have ttf-emojione for emojis as well and noto-fonts and noto-fonts-cjk to give me non-European scripts.</dd>
+
+<dt>Status bar</dt>
+<dd><a target="_blank" href="https://github.com/slmoby/gentoo-rice">dwmbar</a> You can find my configuration here.</dd>
+
+<dt>Text editing and programming</dt>
+<dd><a target="_blank" href="https://www.vim.org/">vim</a>. I have been using vim since I switched to dwm.</dd>
+
+<dt>Web browser</dt>
+<dd>Google-Chrome. All other browsers are worse.
+</dd>
+
+<dt>File manager</dt>
+<dd>ranger. I use file managers less and less nowadays and usually pull one up merely for illustration in Speech.</dd>
+
+<dt>Mail client</dt>
+<dd> Most of the time I will use chrome</dd>
+
+<dt>Music/audio player</dt>
+<dd><a target="_blank" href="https://github.com/slmoby/gentoo-rice">mpd with ncmpcpp</a> for a library, mpv for playing songs manually when I select them in ranger. I also occasionally use <code>beet</code> for music tagging and organization.</dd>
+
+<dt>Video player</dt>
+<dd>mpv. Don't bother with any other video player.</dd>
+
+<dt>RSS reader</dt>
+<dd>Null.In fact, I subscribed with Kindle</dd>
+
+<dt>Video and Audio</dt>
+<dd>ffmpeg is the tool I use to , and also splice and combine all of the video and audio when needed. I sometimes use Blender for making videos which would require NLE, but I always begrudge it. If you're a novice at video editing, kdenlive would probably be better.</dd>
+
+
+<dt>Writing documents</dt>
+<dd>I used to write documents in either <a target="_blank" href="https://rmarkdown.rstudio.com/">R Markdown</a> or <a target="_blank" href="https://www.latex-project.org/">(Xe-)LaTeX</a> and compile them into either pdf documents or presentations after that.</dd>
+
+<dt>Presentations</dt>
+<dd><a target="_blank" href="https://www.youtube.com/watch?v=aCLCl96eNaI">suckless sent</a> is my new favorite presentation software, which creates a presentation immediately from a plain text file. Barring that, and especially for academic presentations, I use <a target="_blank" href="https://www.youtube.com/watch?v=zEjBCQhND2c">LaTeX Beamer</a> which you can also <a target="_blank" href="https://www.youtube.com/watch?v=dum7q6UXiCE">compile from markdown via pandoc</a>.
+I find presenting without software is usually the best in normal circumstances.
+</dd>
+
+<dt>Excel-like spreadsheets</dt>
+<dd><a target="_blank" href="https://www.youtube.com/watch?v=K_8_gazN7h0">sc-im</a> for when I need a very visual interface, but I generally use <a target="_blank" href="https://www.youtube.com/playlist?list=PL-p5XmQHB_JQlsPHtcxNWpvDudyoWB2kH">R</a> for the things one typically does in a spreadsheet. Most things you need and excel-like program for can just be done with your core utilities.</dd>
+
+<dt>PDF viewer</dt>
+<dd><a target="_blank" href="https://www.youtube.com/watch?v=V_Iz4zdyRM4">zathura</a>.
+I used to use mupdf, which is good too.</dd>
+
+<dt>Image Viewer</dt>
+<dd><a target="_blank" href="https://www.youtube.com/watch?v=GYW9i_u5PYs">sxiv</a>. Handles images, animated gifs, has additional thumbnail and slideshow modes and allows you to run custom scripts and read/write to standard input/output. Okay. This is epic.</dd>
+
+<dt>Image modification</dt>
+<dd><a target="_blank" href="https://www.youtube.com/watch?v=5m8Oaz8XWVI">GIMP</a> for big things, but imagemagick commands for most little modifications, filter changes, trims, etc.</dd>
+
+<dt>Calendar, To-Do list, Appointments</dt>
+<dd><a target="_blank" href="https://www.youtube.com/watch?v=hvc-pHjbhdE">calcurse</a> if I have to for somethings, but a notepad (a literal physical notepad), or my brain for most important things. I usually write notes for my screencasts on a notepad and occasionally glance at them while recording to keep me on track.</dd>
+</dl>
+
+<h2>Where can I find good software options?</h2>
+
+<p>The program of your dreams is probably listed below:</p>
+
+<ul>
+		<li><a target="_blank" href="https://suckless.org/rocks/">The suckless website's list of programs that "rock"</a> &ndash; Generally minimalist programs</li>
+			<li><a target="_blank" href="https://github.com/mayfrost/guides/blob/master/ALTERNATIVES.md">A more comprehensive (and gradient) list of minimalist software</a></li>
+				<li><a target="_blank" href="https://directory.fsf.org/wiki/Main_Page">The FSF's Free Software Directory</a> &ndash; Emphasis on libre software (although most software in the links above will have free licenses as well)</li>
+					<li><a target="_blank" href="https://wiki.installgentoo.com/index.php/List_of_recommended_GNU/Linux_software">Install Gentoo wiki recommendations</a> &ndash; A good mix of programs for novices and advanced users</li>
+
+</ul>
+
+<h2>Hardware I Use</h2>
+
+<dl>
+	<dt>Laptop</dt>
+	<dd>The main laptop I use is a Thinkpad X220, released in 2011. I bought mine used on Taobao 450 ￥, and it included the ThinkPad Ultrabase, which I use at home daily (it can also hold an extra hard drive and I have a 2TB one inside). Old ThinkPads are designed for long term corporate use, and last forever and are made to be easy to repair and improve. They have many simple perks, like their uniquely tactile keyboards, their trackpoints and their ThinkLight (a more commonsense solution to lighting your keyboard at night). Newer ThinkPads are not as good, lacking the classical keyboards and generally being more Mac-like (unrepairable, breakable, and generally bad for an enormous price).
+	</dd>
+	<dt>Hard drives</dt>
+	<dd>I own two Solid State Drives (SSDs), one for my main laptop (240GB) and one for my WorkStation OS (1TB). I think they're both "Crucial" brand. SSDs are the only thing I recommend using a good bit of money on in your computer build. They make your computer hugely snappier and apparently use less power.</dd>
+	<dt>Peripherals</dt>
+	<dd>I use a bargain-bin mouse and a laptop's keyboard.</dd>
+	<dt>Microphone</dt>
+	<dd>Null</dd>
+	<dt>Webcam</dt>
+	<dd>Null</dd>
+</dl>
+
+
+</html>
