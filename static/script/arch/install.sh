@@ -145,7 +145,7 @@ done
     break
     done
 
-    pacstrap /mnt base linux base-devel --force
+    pacstrap /mnt base linux-firmware linux base-devel --force
     genfstab -U -p /mnt > /mnt/etc/fstab
 }
 
