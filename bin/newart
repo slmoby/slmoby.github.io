@@ -1,6 +1,0 @@
-#!/bin/bash
-# Blog's Name
-
-cp ./context/demo.html ./context/$1.html
-
-echo $1.html is done

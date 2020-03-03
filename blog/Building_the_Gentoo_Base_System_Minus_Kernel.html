@@ -1,0 +1,317 @@
+<html>
+  <head>
+    <!-- Css  -->
+    <div class="mainpanel" >
+      <link rel="stylesheet" type="text/css" href="../css/lfs.css" />
+      <meta name="generator" content="DocBook XSL Stylesheets V1.78.1" />
+      <link rel="stylesheet" href="../css/lfs-print.css" type="text/css" media="print" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    </div>
+    <!-- Css end -->
+<!-- Website Icon-->
+    <title>构建基本系统</title>
+    <link rel="icon" type="image/x-icon" href="../images/favicon.ico"/>
+<!-- own -->
+    <meta name="keywords" content="Blog, Gentoo, Linux">
+    <meta name="author" content="Chris ?">
+    <meta name="description" content="Chris's Blog">
+  </head>
+  <body>
+
+    <h1><big>构建基本系统</big> </h1>
+    <h2>chroot的最终准备</h2>
+    <p>
+      我们首先要设置合适的portage源，由于Ubuntu Livecd没有<code>mirrorselect</code>工具所以我们直接写入文件。
+      将其保存在<code>/etc/portage/make.conf</code>
+<pre><kbd>GENTOO_MIRRORS="https://mirrors.tuna.tsinghua.edu.cn/gentoo"</kbd></pre>
+    </p>
+    <p>
+      然后创建repos目录
+      <pre><kbd>mkdir -p -v /mnt/gentoo/etc/portage/repos.conf
+nano -w /mnt/gentoo/etc/portage/repos.conf/gentoo.conf</kbd></pre>
+      其内容如下
+      <pre><kbd>[DEFAULT]
+main-repo = gentoo
+
+[gentoo]
+location = /var/db/repos/gentoo
+sync-type = webrsync
+#sync-type = rsync
+sync-uri = rsync://rsync.gentoo.org/gentoo-portage
+sync-webrsync-verify-signature = true
+auto-sync = yes
+
+sync-rsync-verify-jobs = 1
+sync-rsync-verify-metamanifest = yes
+sync-rsync-verify-max-age = 24
+sync-openpgp-keyserver = hkps://keys.gentoo.org
+sync-openpgp-key-path = /usr/share/openpgp-keys/gentoo-release.asc
+sync-openpgp-key-refresh-retry-count = 40
+sync-openpgp-key-refresh-retry-overall-timeout = 1200
+sync-openpgp-key-refresh-retry-delay-exp-base = 2
+sync-openpgp-key-refresh-retry-delay-max = 60
+sync-openpgp-key-refresh-retry-delay-mult = 4</kbd></pre>
+    </p>
+    <p>
+      复制<code>resolv.conf</code>文件到新环境
+      <pre><kbd>cp -v -L /etc/resolv.conf /mnt/gentoo/etc/</kbd></pre>
+    </p>
+    <p>
+      挂载必要的文件系统
+      <pre><kbd>mount -v -t proc none /mnt/gentoo/proc
+mount -v --rbind /sys /mnt/gentoo/sys
+mount -v --rbind /dev /mnt/gentoo/dev
+mount -v --make-rslave /mnt/gentoo/sys
+mount -v --make-rslave /mnt/gentoo/dev</kbd></pre>
+    </p>
+    <h2>进入chroot</h2>
+    <p>
+      挂载好必要的文件系统之后我们就准备进入chroot了，但是我们使用的是Ubuntu Livecd还要做如下操作
+      <pre><kbd>test -L /dev/shm && rm /dev/shm && mkdir /dev/shm
+mount --types tmpfs --options nosuid,nodev,noexec shm /dev/shm
+chmod 1777 /dev/shm</kbd></pre>
+      然后进入chroot
+      <pre><kbd>chroot /mnt/gentoo /bin/bash
+source /etc/profile
+export PS1="(chroot) $PS1"	  
+</kbd></pre>
+    </p>
+    <h2> 安装最新的portage树</h2>
+    <pre><kbd>emaint sync --auto</kbd></pre>
+    然后等待同步完成之后再修改gentoo.conf文件
+    <pre><kbd>nano -w /etc/portage/repos.conf/gentoo.conf<kbd></pre>
+    修改其同步类型为<code>rsync</code>
+    <pre><kbd>sync-type = rsync</kbd></pre>
+    然后再次进行同步
+    <pre><kbd>emaint sync --auto</kbd></pre>
+    <h2>设置基本配置文件</h2>
+    <p>
+      这里选择设置的是stable分支不包含桌面和systemd的profile
+      <pre><kbd>eselect profile list
+Available profile symlink targets:
+  [1]   default/linux/amd64/17.0 (stable)
+  [2]   default/linux/amd64/17.0/selinux (stable)
+  [3]   default/linux/amd64/17.0/hardened (stable)
+  [4]   default/linux/amd64/17.0/hardened/selinux (stable)
+  [5]   default/linux/amd64/17.0/desktop (stable)
+  [6]   default/linux/amd64/17.0/desktop/gnome (stable)
+  [7]   default/linux/amd64/17.0/desktop/gnome/systemd (stable)
+  [8]   default/linux/amd64/17.0/desktop/plasma (stable)
+  [9]   default/linux/amd64/17.0/desktop/plasma/systemd (stable)
+  [10]  default/linux/amd64/17.0/developer (stable)
+  [11]  default/linux/amd64/17.0/no-multilib (stable)
+  [12]  default/linux/amd64/17.0/no-multilib/hardened (stable)
+  [13]  default/linux/amd64/17.0/no-multilib/hardened/selinux (stable)
+  [14]  default/linux/amd64/17.0/systemd (stable)
+  [15]  default/linux/amd64/17.0/x32 (dev)
+  [16]  default/linux/amd64/17.1 (stable) *
+  [17]  default/linux/amd64/17.1/selinux (stable)
+  [18]  default/linux/amd64/17.1/hardened (stable)
+  [19]  default/linux/amd64/17.1/hardened/selinux (stable)
+  [20]  default/linux/amd64/17.1/desktop (stable)
+  [21]  default/linux/amd64/17.1/desktop/gnome (stable)
+  [22]  default/linux/amd64/17.1/desktop/gnome/systemd (stable)
+  [23]  default/linux/amd64/17.1/desktop/plasma (stable)
+  [24]  default/linux/amd64/17.1/desktop/plasma/systemd (stable)
+  [25]  default/linux/amd64/17.1/developer (stable)
+  [26]  default/linux/amd64/17.1/no-multilib (stable)
+  [27]  default/linux/amd64/17.1/no-multilib/hardened (stable)
+  [28]  default/linux/amd64/17.1/no-multilib/hardened/selinux (stable)
+  [29]  default/linux/amd64/17.1/systemd (stable)
+  [30]  default/linux/amd64/17.0/musl (exp)
+  [31]  default/linux/amd64/17.0/musl/hardened (exp)
+  [32]  default/linux/amd64/17.0/musl/hardened/selinux (exp)
+  [33]  default/linux/amd64/17.0/uclibc (exp)
+  [34]  default/linux/amd64/17.0/uclibc/hardened (exp)
+</kbd></pre>
+      这里可以使用eselect设置profile
+      <pre><kbd>eselect profile set 16</kbd></pre>
+      健全性检查
+      <pre><kbd>emerge --info</kbd></pre>
+    </p>
+    <h2>保持portage是最新的</h2>
+    <p>
+      现在我们已经有了一个配置文件我们还要确保portage是最新的：
+      <pre><kbd>emerge --ask --verbose --oneshot portage</kbd></pre>
+      如果系统提示你有可用的新闻条目，请花点时间阅读他们，这些是非常重要的,开发人员向用户发布的简单的公告。要查看当前新闻条目可以：
+      <pre><kbd>eselect news list</kbd></pre>
+      可以看到这些新闻有编号比如说新闻N就可以
+      <pre><kbd>eselect news read N</kbd></pre>
+      还可以通过这条命令清除以阅读的新闻
+      <pre><kbd>eselect news purge</kbd></pre>
+    </p>
+
+    <h2>时间和语言环境</h2>
+    <p>
+      stage3文件中默认是没有设置时区的让我们来设置一下。
+    </p>
+    <p>
+      首先是时区可以在<code>/usr/share/zoneinfo </code>目录下找到相应的时区。
+      <pre><kbd>ls /usr/share/zoneinfo</kbd></pre>
+      比如说我这里需要设置亚洲上海时间我可以这样操作：
+      <pre><kbd>echo "Asia/Shanghai" > /etc/timezone</kbd></pre>
+      我们还需要重新配置<a href="https://packages.gentoo.org/packages/sys-libs/timezone-data"><code> sys-libs/timezone-data</code></a>，这会重新从<code>/etc/timezone</code>中获取值，并且在<code>/etc/localtime</code>中显示正确的值。后者对于C库来说是必须的。
+      <pre><kbd>emerge -v --config sys-libs/timezone-data</kbd></pre>
+      其次我们还需要设置合适的语言环境。我们需要修改<code>/etc/locale.gen</code>文件来指定需要的语言环境。
+      <pre><kbd>echo "en_US.UTF-8 UTF-8
+zh_CN.UTF-8 UTF-8" >> /etc/locale.gen</kbd></pre>
+      然后我们必须要基于<code>/etc/locale.gen</code>文件的内容，运行<code>locale-gen</code>来创建语言环境
+      <pre><kbd>locale-gen</kbd></pre>
+      最后我们还需要指定以下默认的语言环境.使用下面这条命令来查看目前系统的语言环境
+      <pre><kbd>eselect locale list
+Available targets for the LANG variable:
+  [1]   C
+  [2]   C.utf8
+  [3]   en_US.utf8
+  [4]   POSIX
+  [5]   zh_CN.utf8
+  [ ]   (free form)
+</kbd></pre>
+      推荐默认使用英文当作默认的语言环境中文可能在tty下面会出现乱码
+      <pre><kbd>eselect locale set  3</kbd></pre>
+      现在重新载入环境
+      <pre><kbd>env-update && source /etc/profile && export PS1="(chroot) $PS1"</kbd></pre>
+    </p>
+    <h2>Gentoo Bootstrapping</h2>
+    <p>
+      用Gentoo的话来说，人们谈到引导的三个“阶段”（及其相应的文件系统压缩包）：<br> 阶段1：从第1阶段tarball开始时，必须在/ var / db / repos / gentoo / scripts的指导下，使用现有的（二进制）宿主系统工具链来构建基本工具链（GCC，标准C库等）。 /bootstrap.sh脚本。 这将产生：<br> 第2阶段系统。 在这里，我们仍然需要使用我们的新工具链来生成（构建）核心@world软件包集。 这将产生：<br> 第3阶段系统，其中的工具链已被引导，重要的系统二进制文件和库已使用该工具进行编译。 <br>现在，提供了这样的第3阶段系统目录的tarball作为Gentoo发行版的默认部分（第1阶段和第2阶段tarball不再对最终用户可用）。<br>
+尽管我们已经下载了第3阶段的tarball，但我们将假装没有下载，而是从第1阶段开始构建。
+    </p>
+    <p>
+      好的，让我们开始吧。 首先，我们需要构建自己的工具链！ 我们将切换到正确的目录，然后进行运行以查看提供的bootstrap.sh脚本要执行的操作：
+      <pre><kbd>cd /var/db/repos/gentoo/scripts</kbd></pre>
+      然后：
+      <pre><kbd>./bootstrap.sh --pretend
+
+Gentoo Linux; http://www.gentoo.org/
+Copyright 1999-$ Gentoo Foundation; Distributed under the GPLv2
+-------------------------------------------------------------------------------
+  [[ (0/3) Locating packages ]]
+ * Using baselayout : >=sys-apps/baselayout-2
+ * Using portage    : portage
+ * Using os-headers : >=sys-kernel/linux-headers-5.5
+ * Using binutils   : sys-devel/binutils
+ * Using gcc        : sys-devel/gcc
+ * Using gettext    : gettext
+ * Using libc       : virtual/libc
+ * Using texinfo    : sys-apps/texinfo
+ * Using zlib       : zlib
+ * Using ncurses    : ncurses
+-------------------------------------------------------------------------------
+  [[ (1/3) Configuring environment ]]
+-------------------------------------------------------------------------------
+  [[ (2/3) Updating portage ]]
+!!! CONFIG_PROTECT is empty
+
+These are the packages that would be merged, in order:
+
+Calculating dependencies... done!
+[ebuild   R    ] sys-apps/portage-2.3.89  USE="build* -native-extensions* -rsync-verify* -xattr*" 
+-------------------------------------------------------------------------------
+  [[ (3/3) Emerging packages ]]
+!!! CONFIG_PROTECT is empty
+</kbd></pre>
+      Gentoo FAQ上是推荐查看了这个脚本之后在进行操作的，实际上运行之后就会发现上面有几个空的设置。<br>首先第一步卡住的就是脚本需要重建的C标准库是虚拟的，但是在portage默认情况下，出现虚拟软件包不会导致重新构建满足该要求的任何以安装的软件包，所以我们需要修改这个脚本。
+      <pre><kbd>nano -w bootstrap.sh</kbd></pre>
+      在nano里面使用Crtl+w搜索关键字<code>should never fail</code>然后回车然后会到myLIBC and modify这个块：
+      <pre><kbd># This stuff should never fail but will if not enough is installed.
+[[ -z ${myBASELAYOUT} ]] && myBASELAYOUT=">=$(portageq best_version / sys-apps/baselayout)"
+[[ -z ${myPORTAGE}    ]] && myPORTAGE="portage"
+[[ -z ${myBINUTILS}   ]] && myBINUTILS="binutils"
+[[ -z ${myGCC}        ]] && myGCC="gcc"
+[[ -z ${myGETTEXT}    ]] && myGETTEXT="gettext"
+[[ -z ${myLIBC}       ]] && myLIBC="$(portageq expand_virtual / virtual/libc)"
+[[ -z ${myTEXINFO}    ]] && myTEXINFO="sys-apps/texinfo"
+[[ -z ${myZLIB}       ]] && myZLIB="zlib"
+[[ -z ${myNCURSES}    ]] && myNCURSES="ncurses"
+</kbd></pre>
+      然后我们需要将<code>myLIBC</code>这一行的 <code> && </code>改为 <code>;</code>意思是无条件执行下面的语句<br>
+      第二个问题是对于现代的gcc需要开启<code>openmp</code>的USE标记，我们继续使用Ctrl+w进行搜索关键字为 <code>USE=</code>修改的结果如下
+      <pre><kbd>export USE="-* bootstrap ${ALLOWED_USE} ${BOOTSTRAP_USE} openmp"</kbd></pre>
+      完成后保存退出nano
+      查看结果可以看到glibc已经不是虚拟的了
+      <pre><kbd>./bootstrap.sh --pretend         
+
+Gentoo Linux; http://www.gentoo.org/
+Copyright 1999-$ Gentoo Foundation; Distributed under the GPLv2
+-------------------------------------------------------------------------------
+  [[ (0/3) Locating packages ]]
+ * Using baselayout : >=sys-apps/baselayout-2
+ * Using portage    : portage
+ * Using os-headers : >=sys-kernel/linux-headers-5.5
+ * Using binutils   : sys-devel/binutils
+ * Using gcc        : sys-devel/gcc
+ * Using gettext    : gettext
+ * Using libc       : sys-libs/glibc:2.2
+ * Using texinfo    : sys-apps/texinfo
+ * Using zlib       : zlib
+ * Using ncurses    : ncurses
+-------------------------------------------------------------------------------
+  [[ (1/3) Configuring environment ]]
+-------------------------------------------------------------------------------
+  [[ (2/3) Updating portage ]]
+!!! CONFIG_PROTECT is empty
+</kbd></pre>
+      CONFIG_PROTECT为空表示您的引导过程不会保留您可能已修改的任何配置文件，如果要安装的任何软件包都试图覆盖它们。 <br>到目前为止（此处和此处），我们已经修改了（而不是从头开始创建）两个这样的配置文件，因此，让我们使用（提供的）qfile实用程序检查是否有一个受影响（这向我们展示了哪个软件包“使用”了给定的文件） ）：
+      <pre><kbd>qfile /etc/locale.gen /etc/conf.d/keymaps
+sys-apps/openrc: /etc/conf.d/keymaps
+sys-libs/glibc: /etc/locale.gen
+</kbd></pre>
+
+      由于引导程序会重建第二个包，因此我们需要存放配置文件/etc/locale.gen的临时副本，以便以后可以将其还原。
+      <pre><kbd>cp -v /etc/locale.gen{,.bak}</kbd></pre>
+      好了我们现在可以真正的开始引导程序
+      <pre><kbd>./bootstrap.sh</kbd></pre>
+      待完成之后如果发现gcc升级的话选择最新的gcc
+      <pre><kbd>eselect gcc list
+ [1] x86_64-pc-linux-gnu-9.2.0 *
+</kbd></pre>
+      可以看到我这里并没有升级gcc所以我可以不进行操作，如果你在制作的时候gcc升级了选择最新的gcc
+      <pre><kbd>eselect gcc set 1</kbd></pre>
+      完成这些操作后，需要还原我们之前备份的文件，然后重新生成语言环境。（因为脚本在执行的时候也会清除掉这个）。
+      <pre><kbd>mv -v /etc/locale.gen{.bak,}
+locale-gen      </kbd></pre>
+      查看语言环境
+      <pre><kbd>eselect locale list
+Available targets for the LANG variable:
+  [1]   C
+  [2]   C.utf8
+  [3]   en_US.utf8 *
+  [4]   POSIX
+  [5]   zh_CN.utf8
+  [ ]   (free form)
+</kbd></pre>
+      最后返回 / 目录
+      <pre><kbd>cd /</kbd></pre>
+    </p>
+    <h2>从stage2到stage3</h2>
+    <p>
+      在开始之前，我们需要编写一个空的“时间戳”文件，在以后检查所有可执行文件和库确实已被重建时，将其用作标记。
+      <pre><kbd>touch /tmp/prebuild_checkpoint</kbd></pre>
+      完成之后，我们终于准备好在@world软件包集中构建所有内容（包括它们赖以构建或运行的所有其他软件包），如下所示：
+      <pre><kbd>emerge --ask --verbose --emptytree --with-bdeps=y @world</kbd></pre>
+      等到全部完成之后可以执行如下清理系统
+      <pre><kbd>emerge --depclean && emerge --ask --verbose --emptytree --with-bdeps=y @world</kbd></pre>
+      
+    </p>
+    <h2> 验证Bootstrap</h2>
+    <p>
+    恭喜-至此，你已经执行了“阶段1”引导程序，因此，当前chroot中的所有（二进制）应用程序和库都应重新编译。 为了确保没有任何事情发生（例如，我们先前下载的第3阶段tarfile中包含某种应用程序或库，但未包含在@world软件包集的深层传递依赖项关闭中），我们将检查日期戳 开始出现之前针对我们编写的<code>/tmp/prebuild_checkpoint</code>的所有相关组件。 我们不必担心任何文本可执行文件（例如脚本），因为从原则上讲，可以对它们进行审核以确保它们不是恶意的。<br>
+    首先，删除不属于依赖关系树的所有已安装软件包，以免混淆以下测试。 命令：
+    <pre><kbd>emerge --depclean</kbd></pre>
+    等到完成之后执行
+    <pre><kbd>find / -type d -path /boot/ -prune -o \
+-path /proc -prune -o -type f -executable -not -newer \
+/tmp/prebuild_checkpoint -print0 2>/dev/null | xargs -0 file\
+--no-pad --separator="@@@" | grep -iv '@@@.* text'</kbd></pre>
+    该命令查找所有可执行文件（在<code>/boot</code>的挂载点下方；它将挂载一个ext2文件系统（在挂载时所有文件都显示为可执行文件），以及特殊的/proc伪文件系统），这些文件不是比检查点文件更新，然后使用file测试它们的文件类型，并在无法识别为某种形式的文本文件（脚本，源代码等）的情况下打印它们。它不会产生任何输出（因为如果我们的引导已完成，则应该重新创建所有此类文件）。<br>
+    对于可执行二进制文件来说太多了-库（共享的还是静态的）呢？在Gentoo上，我们已经检查了大多数共享（.so）库，因为它们的执行位已设置。 但是，并非所有的Linux都这样，而且静态（'.a'）库（和'.o'对象文件）没有设置执行位。因此，为保证起见，我们将运行另一个测试（这可能需要一些时间才能完成）：
+    <pre><kbd>find / -type d -path /boot/ \
+-prune -o -path /proc -prune -o -type f \
+-not -executable -not -newer /tmp/prebuild_checkpoint -print0 2>/dev/null | xargs -0 file \
+--no-pad --separator="@@@" | grep '@@@.*\( ELF\| ar archive\)'</kbd></pre>
+这将查找所有不比我们的检查点文件新的文件，并且文件会将该文件识别为ELF或ar存档； 可能需要一些时间才能完成（因为要检查的文件很多）。 同样，它不应产生任何输出。 如果是这样，并且之前的检查也可行，那么恭喜，您已经完全重建了计算机上的所有可执行二进制文件和库！
+    
+    </p>
+  </body>
+</html>

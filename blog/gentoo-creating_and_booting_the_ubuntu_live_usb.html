@@ -1,0 +1,39 @@
+<html>
+  <head>
+    <!-- Css  -->
+    <div class="mainpanel" >
+      <link rel="stylesheet" type="text/css" href="../css/lfs.css" />
+      <meta name="generator" content="DocBook XSL Stylesheets V1.78.1" />
+      <link rel="stylesheet" href="../css/lfs-print.css" type="text/css" media="print" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    </div>
+    <!-- Css end -->
+<!-- Website Icon-->
+    <title>创建和启动Ubuntu Livecd</title>
+    <link rel="icon" type="image/x-icon" href="../images/favicon.ico"/>
+<!-- own -->
+    <meta name="keywords" content="Blog, Gentoo, Linux">
+    <meta name="author" content="Chris ?">
+    <meta name="description" content="Chris's Blog">
+  </head>
+  <body>
+
+    <h1><big>创建和启动Ubuntu Livecd</big> </h1>
+    <p>
+      我们需要下载Ubuntu Livecd的安装镜像。国内可以从<a href="https://mirrors.ustc.edu.cn/">中科大源</a>下载。下载完成之后进行刻录。
+    </p>
+    <h2>刻录和启动</h2>
+    <p>
+      下载完成之后我们就要将下载的镜像刻录到usb设备上。
+<pre class="userinput"><kbd class="command">dd if=ubuntu.iso of=/dev/sdb bs=10M status=progress && sync</kbd></pre>
+    </p>
+    <p>
+      将机器关机，插入刻录好的U盘然后开机按ECS选择USB设备启动。
+    </p>
+    <h2> 设置时间 </h2>
+    <p>
+      启动之后还有一个比较重要的就是设置时间可以使用<code>date</code>命令来设置时间,以MMDDhhmmYYYY格式（月，日，小时，分钟，年）设置日期和时间：
+      <pre class="userinput"><kbd class="command">date MMDDhhmmYYYY</kbd></pre>
+    </p>
+  </body>
+</html>

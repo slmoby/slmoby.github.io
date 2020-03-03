@@ -1,0 +1,107 @@
+<html>
+  <head>
+    <div class="mainpanel" >
+      <link rel="stylesheet" type="text/css" href="../css/lfs.css" />
+      <meta name="generator" content="DocBook XSL Stylesheets V1.78.1" />
+      <link rel="stylesheet" href="../css/lfs-print.css" type="text/css" media="print" />
+
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</div>
+<!-- Website Icon-->
+<title>Gentoo Luks ThinkPad X220</title>
+<link rel="icon" type="image/x-icon" href="../images/favicon.ico"/>
+  </head>
+  <body>
+    <h1> Gentoo Luks </h1>
+    <p>
+      一直玩的主力机器都没有上luks全部裸奔不过既然工作了就要考虑安全方面的问题了，于是就有了这篇文章。
+    </p>
+    <p>
+      目的如下
+      <ul>
+	<li>
+	  在磁盘上完全加密（通过LUKS的LVM）
+	</li>
+	<li>
+	  OpenRC和Plasma
+	</li>
+	<li>
+	  正常挂起、睡眠和休眠
+	</li>
+	<li>
+	  摄像头以及数位板之类的设备可以正常工作
+	</li>
+      </ul>
+      让我们开始吧！
+    </p>
+    <h2>环境说明</h2>
+    <p>
+      我的主力机器是ThinkPad X220详细配置如下表
+      <table>
+	<thead>
+          <tr>
+            <th colspan="5">My ThinkPad X220</th>
+          </tr>
+	</thead>
+	<tbody>
+          <tr>
+            <td>CPU</td>
+            <td>Memory</td>
+	    <td>Hard disk</td>
+	    <td>Wireless</td>
+	    <td>firmware</td>
+          </tr>
+	  <tr>
+	    <td>i5-2450M</td>
+	    <td>8G*2</td>
+	    <td>240G SSD</td>
+	    <td>AR9380</td>
+	    <td>coreboot</td>
+	  </tr>
+	</tbody>
+      </table>
+    </p>
+
+    <p>
+      <strong><font color="red">&#x25B4 Warning </font></strong>
+      在开始之前务必要备份好数据此操作会导致数据丢失！
+    </p>
+    <h2> Chapters </h2>
+    <p>
+      下面列出了本文教程的各个文章并简单的介绍了一下每一章的内容。
+      你需要按照教程的顺序来操作。
+      <ol>
+	<li>
+	 <a href="gentoo-installation_prerequisites.html">安装先决条件</a>。首先我们将简要回顾一下安装所需的内容. 
+	</li>
+	<li>
+	  <a href="gentoo-creating_and_booting_the_ubuntu_live_usb.html">创建和启动Ubuntu Livecd</a>
+	</li>
+	<li>
+	  <a href="setup_nework_and_con_via_ssh.html">配置网络和ssh</a>:这样方便从辅助机器上进行连接，以简化安装。
+	</li>
+	<li>
+	  <a href="Preparing_the_LUKS-LVM_Filesystem_and_Boot_USB_Key.html">创建LUKS-LVM文件系统和启动USB密钥</a>。之后，我们将会在第二个USB密钥上创建受GPG保护的密钥文件，在受密钥保护的计算机硬盘上创建LUKS分区，然后再创建LVM结构（root、home、swap之类的）。
+	</li>
+	<li>
+	  <a href="Installing_the_Gentoo_Stage_3_Files.html">安装Gentoo Stage3 文件</a>
+	</li>
+	<li>
+	  <a href="Building_the_Gentoo_Base_System_Minus_Kernel.html">构建基本系统</a>
+	</li>
+	<li>
+	  <a href="Configuring_and_Building_the_Kernel.html">配置内核</a>
+	</li>
+	<li>
+	  设置fstab和其他软件包
+	</li>
+	<li>
+	  清理工作
+	</li>
+	<li>
+	  设置指纹识别
+	</li>
+      </ol>
+    </p>
+  </body>
+</html>

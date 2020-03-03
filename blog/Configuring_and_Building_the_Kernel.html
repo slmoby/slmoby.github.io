@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <!-- Css  -->
+    <div class="mainpanel" >
+      <link rel="stylesheet" type="text/css" href="../css/lfs.css" />
+      <meta name="generator" content="DocBook XSL Stylesheets V1.78.1" />
+      <link rel="stylesheet" href="../css/lfs-print.css" type="text/css" media="print" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    </div>
+    <!-- Css end -->
+    <!-- Website Icon-->
+    <link rel="icon"  href="../images/favicon.ico" type="image/x-icon">
+    
+    <title>配置和构建内核</title>
+    
+<!-- own -->
+    <meta name="keywords" content="Blog, Gentoo, Linux">
+    <meta name="author" content="Chris ?">
+    <meta name="description" content="Chris's Blog">
+  </head>
+  <body>
+
+    <h1><big>配置和构建内核</big> </h1>
+    <p>
+      这里选择的是<a href="https://packages.gentoo.org/packages/sys-kernel/gentoo-sources"><code>gentoo-sources</code></a>的内核，还有其他的内核按照自己的需求选择，这里就已<code>gentoo-sources</code>内核为准<br>
+      <pre><kbd>emerge --ask --verbose sys-kernel/gentoo-sources</kbd></pre>
+      还有固件
+      <pre><kbd>emerge --ask --verbose sys-kernel/linux-firmware</kbd></pre>      
+    </p>
+    <h2>其他必要的包</h2>
+    <pre><kbd>echo -e "# ensure we can generate a bootable kernel and initramfs\nsys-kernel/genkernel-next cryptsetup gpg plymouth" >> /etc/portage/package.use/genkernel-next
+echo -e "sys-boot/plymouth gdm" >> /etc/portage/package.use/plymouth
+echo -e "sys-kernel/genkernel-next cryptsetup plymouth gpg" >> /etc/portage/package.use/genkernel-next
+echo -e "x11-libs/libdrm libkms" >>/etc/portage/package.use/libdrm
+echo -e "x11-libs/cairo X" >> /etc/portage/package.use/cairo
+</kbd></pre>
+    
+  </body>
+</html>

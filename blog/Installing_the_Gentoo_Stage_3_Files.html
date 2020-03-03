@@ -1,0 +1,85 @@
+<html>
+  <head>
+    <!-- Css  -->
+    <div class="mainpanel" >
+      <link rel="stylesheet" type="text/css" href="../css/lfs.css" />
+      <meta name="generator" content="DocBook XSL Stylesheets V1.78.1" />
+      <link rel="stylesheet" href="../css/lfs-print.css" type="text/css" media="print" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    </div>
+    <!-- Css end -->
+<!-- Website Icon-->
+    <title>安装Stage3文件</title>
+    <link rel="icon" type="image/x-icon" href="../images/favicon.ico"/>
+<!-- own -->
+    <meta name="keywords" content="Blog, Gentoo, Linux">
+    <meta name="author" content="Chris ?">
+    <meta name="description" content="Chris's Blog">
+  </head>
+  <body>
+
+    <h1><big>安装Stage文件</big> </h1>
+    <p>
+      这里可以从<a href="http://mirrors.ustc.edu.cn/gentoo/releases/amd64/autobuilds/">中科大源</a>下载stage3文件我这里没有<code>systemd</code>的需求可以进入current-stage3-amd64然后下载stage3文件
+      如下(这个链接以你实际看到的为准)：
+      <pre><kbd>wget -c http://mirrors.ustc.edu.cn/gentoo/releases/amd64/autobuilds/current-stage3-amd64/stage3-amd64-20200226T214502Z.tar.xz</kbd></pre>
+    </p>
+    <p>
+      下载完成之后解压文件
+      <pre><kbd>tar xvJpf stage3-amd64-*.tar.xz --xattrs-include='*.*' --numeric-owner</kbd></pre>
+    </p>
+    <h2>配置 <code>/etc/portage/make.conf</code></h2>
+    <p>编辑<code>/etc/portage/make.conf</code>文件</p>
+<pre><kbd>
+# Build setup as of <add current date>
+
+# C, C++ and FORTRAN options for GCC.
+COMMON_FLAGS="-march=native -O2 -pipe"
+CFLAGS="${COMMON_FLAGS}"
+CXXFLAGS="${COMMON_FLAGS}"
+FCFLAGS="${COMMON_FLAGS}"
+FFLAGS="${COMMON_FLAGS}"
+MAKEOPTS="-j5"
+
+# Note: MAKEOPTS and EMERGE_DEFAULT_OPTS are set in .bashrc
+
+# The following licence is required, in addition to *.
+ACCEPT_LICENSE="*"
+
+# WARNING: Changing your CHOST is not something that should be done lightly.
+# Please consult http://www.gentoo.org/doc/en/change-chost.xml before changing.
+CHOST="x86_64-pc-linux-gnu"
+
+# Use the 'stable' branch - 'testing' no longer required for Gnome 3.
+# NB, amd64 is correct for both Intel and AMD 64-bit CPUs
+ACCEPT_KEYWORDS="~amd64"
+
+# Additional USE flags supplementary to those specified by the current profile.
+USE=""
+CPU_FLAGS="aes avx mmx mmxext popcnt sse sse2 sse3 sse4_1 sse4_2 ssse3"
+CPU_FLAGS_X86="${CPU_FLAGS}"
+
+# Important Portage directories.
+PORTDIR="/var/db/repos/gentoo"
+DISTDIR="/var/cache/distfiles"
+PKGDIR="/var/cache/binpkgs"
+
+# This sets the language of build output to English.
+# Please keep this setting intact when reporting bugs.
+LC_MESSAGES=C
+
+# Turn on logging - see http://gentoo-en.vfose.ru/wiki/Gentoo_maintenance.
+PORTAGE_ELOG_CLASSES="info warn error log qa"
+# Echo messages after emerge, also save to /var/log/portage/elog
+PORTAGE_ELOG_SYSTEM="echo save"
+
+# Ensure elogs saved in category subdirectories.
+# Build binary packages as a byproduct of each emerge, a useful backup.
+FEATURES="split-elog buildpkg"
+
+# Settings for X11
+VIDEO_CARDS="intel i965"
+INPUT_DEVICES="libinput"	
+</kbd></pre>
+  </body>
+</html>

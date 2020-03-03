@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <!-- Css  -->
+    <div class="mainpanel" >
+      <link rel="stylesheet" type="text/css" href="../css/lfs.css" />
+      <meta name="generator" content="DocBook XSL Stylesheets V1.78.1" />
+      <link rel="stylesheet" href="../css/lfs-print.css" type="text/css" media="print" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    </div>
+    <!-- Css end -->
+<!-- Website Icon-->
+    <title>配置网络和ssh</title>
+    <link rel="icon" type="image/x-icon" href="../images/favicon.ico"/>
+<!-- own -->
+    <meta name="keywords" content="Blog, Gentoo, Linux">
+    <meta name="author" content="Chris ?">
+    <meta name="description" content="Chris's Blog">
+  </head>
+  <body>
+
+    <h1><big>配置网络和ssh</big> </h1>
+    
+    <p>
+      这里设置网络和ssh方便去下载资源和远程连接
+    </p>
+    <h2>连接网络</h2>
+    <p>
+      如果你使用的是有线网络并且网络还有DHCP的话那么网络部分就非常的简单好配置了.直接检查一下是否可以联通外网就可以了。如果是WiFi可以通过桌面的网络图标进行连接WiFi，之后测试是否可以联通外网。
+      <pre class="userinput"><kbd class="command">ping -c4 gentoo.org</kbd></pre>
+      其他的连接方式可以参考<a href="https://wiki.archlinux.org/index.php/Network_Configuration">ArchWiki</a>。
+    </p>
+    <h2> 配置SSH </h2>
+    我们首先要给root用户设置一个密码作为ssh登录时连接使用    
+    <pre class="userinput"><kbd class="command">passwd</kbd></pre>
+    默认情况下Ubuntu Livecd是没有openssh服务的我们需要先安装一个<code>openssh-server</code>的包
+    <pre class="userinput"><kbd class="command">apt-get update && apt-get install openssh-server</kbd></pre>
+    然后启动ssh服务
+    <pre class="userinput"><kbd class="command">systemctl start sshd</kbd></pre>
+  </body>
+</html>

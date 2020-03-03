@@ -1,0 +1,218 @@
+<html>
+  <head>
+    <!-- Css  -->
+    <div class="mainpanel" >
+      <link rel="stylesheet" type="text/css" href="../css/lfs.css" />
+      <meta name="generator" content="DocBook XSL Stylesheets V1.78.1" />
+      <link rel="stylesheet" href="../css/lfs-print.css" type="text/css" media="print" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    </div>
+    <!-- Css end -->
+<!-- Website Icon-->
+    <title>创建LUKS-LVM文件系统和启动USB密钥</title>
+    <link rel="icon" type="image/x-icon" href="../images/favicon.ico"/>
+<!-- own -->
+    <meta name="keywords" content="Blog, Gentoo, Linux">
+    <meta name="author" content="Chris ?">
+    <meta name="description" content="Chris's Blog">
+  </head>
+  <body>
+
+    <h1><big>创建LUKS-LVM文件系统和启动USB密钥</big> </h1>
+    <p>
+      这里我们要格式化U盘（作为USB密钥）使它可以正常的引导启动,接下来我们创建密钥这个密钥主要用于保护计算机驱动器，并使用GPG+密码进行加密，然后再进行分区。
+    </p>
+    <h2>格式化和挂在LUKS USB密钥</h2>
+    <p>
+      这里我是用的是dos分区格式所以我只要分出来一个200M的分区就足够存放内核文件以及密钥文件了。
+      <p>
+      <strong><font color="red">&#x25B4 Warning </font></strong>
+      在开始之前务必要备份好数据此操作会导致数据丢失！
+      </p>
+    </p>
+    <p>
+      首先查看一下USB设备
+      <pre class="userinput"><kbd class="command">lsblk</kbd></pre>
+      注意输出和你的U盘容量是否对应，我这里因为我电脑有2个硬盘所以U盘是<code>/dev/sdc</code>
+    </p>
+    <p>
+      然后对U盘进行分区
+
+      <pre class="userinput"><kbd class="command">
+fdisk /dev/sdc	  
+Welcome to fdisk (util-linux 2.35.1).
+Changes will remain in memory only, until you decide to write them.
+Be careful before using the write command.
+
+
+Command (m for help): p
+Disk /dev/sdc: 7.22 GiB, 7747397632 bytes, 15131636 sectors
+Disk model: DataTraveler 2.0
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x4097da9b
+
+Command (m for help): n
+Partition type
+   p   primary (0 primary, 0 extended, 4 free)
+   e   extended (container for logical partitions)
+Select (default p): 
+
+Using default response p.
+Partition number (1-4, default 1): 
+First sector (2048-15131635, default 2048): 
+Last sector, +/-sectors or +/-size{K,M,G,T,P} (2048-15131635, default 15131635): +200M
+
+Created a new partition 1 of type 'Linux' and of size 200 MiB.
+
+Command (m for help): w
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Syncing disks.
+	  
+      </kbd></pre>
+      接下来我们进行格式化分区
+      <pre class="userinput"><kbd class="command">mkfs.ext2 /dev/sdc1 </kbd></pre>
+      现在我们需要创建一个临时目录来挂载分区
+<pre class="userinput"><kbd class="command">mkdir -v /tmp/boot
+mount /dev/sdc1 /tmp/boot
+</kbd></pre>
+    </p>
+    <h2>为LUKS创建受密码保护的密钥文件</h2>
+    <p>
+      接下来我们会创建一个（伪）随机密钥文件（和LUKS一起使用）.该密钥文件将会使用GPG（使用输入密码）进行加密,然后存储到USB密钥上。
+    </p>
+    <p>
+      这样做的目的是建立双重因素的安全性（加密的）密钥文件和你的密码（用于解密）都将需要访问存储目标计算机硬盘上的LUKS数据。这意味着,即使说机器丢失或者是硬盘被人偷走但是没有USB密钥LUKS数据还是安全的。
+    </p>
+    <p>
+      请注意，尽管我们将使用对称的LUKS密码，但我们将创建一个8192KiB基础（即二进制纯文本）密钥文件（短1个字节），但支持的最大密钥大小为256位（ 32字节）（或两个256位密钥= 512位= 64字节，在XTS模式下，如后面所述）。之所以行之有效，是因为LUKS/cryptsetup使用PBKDF2密钥派生功能将密钥文件内部映射到实际的（用户）密钥材料中（这反过来又用于解锁实际用于扇区加密/解密的主密钥），因此我们有空，在限制范围内，选择所需大小的密钥文件。因此，我们选择使用最大的合法大小，以使它（非常轻微）使任何数据捕获恶意软件（例如在低级驱动程序中）难以拦截文件并将其松散，或通过网络是秘密的。从理论上讲，cryptsetup系统最多可以支持8192KiB的密钥文件（执行cryptsetup --help进行验证）；在实践中，由于存在一次性错误，它仅支持严格小于8MiB的密钥文件。因此，我们创建了一个长度为（1024 * 8192）-1 = 8388607字节的密钥文件。
+    </p>
+    <p>
+      请注意，我们将使用<code>/dev/urandom</code>源创建基础（二进制纯文本）伪随机密钥文件，然后将其通过管道传输到gpg进行加密（使用您选择的密码）。生成的二进制密文将保存到USB密钥。这样可以避免将二进制明文密钥文件存储在磁盘上的任何位置（实际上甚至不需要看到未加密的内容）。输入：
+      <pre class="userinput"><kbd class="command">export GPG_TTY=$(tty)
+dd if=/dev/urandom bs=8388607 count=1 | gpg --symmetric --cipher-algo AES256 --output /tmp/boot/luks-key.gpg      </kbd></pre>
+    </p>
+    <p>
+      <strong><font color="red">&#x25B4 Warning </font></strong>如果你丢失了加密的密钥文件，或者是忘记了密码短语，那么你的LUKS数据就会丢失了。因此,请确保同时备份密钥文件和密码短语.
+    </p>
+    <h2>创建分区</h2>
+    <p>
+      规划的分区表如下
+      <table>
+	<thead>
+	  <tr>
+	    <th colspan="3">分区</th>
+	  </tr>
+	  <tbody>
+	    <tr>
+	      <td>物理位置</td>
+	      <td>大小</td>
+	      <td>文件系统</td>
+	    </tr>
+	    <tr>
+	      <td>/dev/sda1</td>
+	      <td>200M</td>
+	      <td>ext2</td>
+	    </tr>
+	    <tr>
+	      <td>/dev/sda2</td>
+	      <td>100G</td>
+	      <td>ext4</td>
+	    </tr>
+	  </tbody>
+	</thead>
+      </table>
+    </p>
+    <h2>用LUKS格式化新分区</h2>
+    <p>
+      使用LUKS格式化分区。 LUKS代表Linux Unified Key Setup（Linux统一密钥设置），顾名思义，它主要是一种用于管理整个分区（或驱动器）加密的加密密钥的方法。为此，它首先生成一个高熵的秘密主密钥，然后使用一个和八个用户密钥（首先由PBKDF2对其进行预处理）对其进行加密。
+    </p>
+    <p>
+      目标分区本身以LUKS元数据头开头，然后是与8个可能的用户“插槽”中的每一个相对应的加密主密钥材料，最后是批量加密（有效载荷）数据本身（分区的加密扇区数据） 。
+    </p>
+    <p>
+      LUKS主密​​钥本身永远不会以未加密的形式存储在分区上，用户（除非你有这需求）甚至都不对用户可见。
+    </p>
+    <p>
+      可以通过发出以下命令获取（当前加载的）加密和哈希算法的列表：
+      <pre class="userinput"><kbd class="command">cat /proc/crypto</kbd></pre>
+    </p>
+    <p>
+      <strong><font color="red">&#x25B4 Warning </font></strong>
+      在开始之前务必要备份好数据此操作会导致数据丢失！
+    </p>
+    <p>
+      <pre class="userinput"><kbd class="command">gpg --decrypt /tmp/boot/luks-key.gpg | cryptsetup --cipher serpent-xts-plain64 --key-size 512 --hash whirlpool --key-file - luksFormat /dev/sdb2</kbd></pre>
+      使用以下命令检查格式是否有效：
+      <pre class="userinput"><kbd class="command">cryptsetup luksDump /dev/sdb2</kbd></pre>
+      要将当前LUKS标头的副本保存到引导USB密钥中
+      <pre class="userinput"><kbd class="command">cryptsetup luksHeaderBackup /dev/sdb2 --header-backup-file /tmp/boot/luks-header.img</kbd></pre>
+    </p>
+    <h2>添加后备密码</h2>
+    <p>
+      因为LUKS最多支持8个用户密钥，所以可以根据需要，在LUKS容器里面添加一个附加密码。比如说你一不小心丢了你的USB密钥，这个功能不能当作日常用但是如果遇到这种情况可以将数据备份出来。
+      <pre class="userinput"></kbd class="command">mkfifo /tmp/gpgpipe && echo RELOADAGENT | gpg-connect-agent && gpg --decrypt /tmp/boot/luks-key.gpg | cat - >/tmp/gpgpipe </kbd></pre>然后新开一个终端执行以下操作
+
+<pre class="userinput"><kbd class="command">cryptsetup --key-file /tmp/gpgpipe luksAddKey /dev/sdb2</kbd></pre>
+检查密码是否添加成功
+<pre class="userinput"><kbd class="command">cryptsetup luksDump /dev/sdb2</kbd></pre>
+
+你应该看到有两个密码槽 0 和 1，然后我们删除创建的这个管道文件
+<pre class="userinput"><kbd class="command">rm -vf /tmp/gpgpipe</kbd></pre>
+</p>
+<h2>在LUKS上创建LVM结构</h2>
+<p>
+  首先要打开LUKS分区
+  <pre class="userinput"><kbd class="command">gpg --decrypt /tmp/boot/luks-key.gpg | cryptsetup --key-file - luksOpen /dev/sdb2 gentoo</kbd></pre>
+  检查工作是否正常
+  <pre><kbd>ls /dev/mapper </kbd></pre>
+  创建PV
+  <pre><kbd>pvcreate /dev/mapper/gentoo</kbd></pre>
+  创建vg
+  <pre><kbd>vgcreate chris /dev/mapper/gentoo</kbd></pre>
+  创建swap
+  <pre><kbd>lvcreate --size 8G --name swap chris</kbd></pre>
+  创建 /
+  <pre><kbd>lvcreate --size 60G --name root chris</kbd></pre>
+  创建 /home
+  <pre><kbd>lvcreate --extents 95%FREE --name home chris</kbd></pre>
+  查看卷状态
+  <pre><kbd>pvdisplay
+vgdisplay
+lvdisplay</kbd></pre>
+</p>
+<h2>格式化和挂载LVM逻辑卷</h2>
+<p>
+  现在我们已经创建好分区了这里就需要设置其文件系统并挂载.
+</p>
+<p>
+  首先是swap分区
+  <pre><kbd>mkswap -L "swap" /dev/mapper/chris-swap</kbd></pre>
+  root分区这里选择是ext4文件系统
+  <pre><kbd>mkfs.ext4 -L "root" /dev/mapper/chris-root</kbd></pre>
+  最后是home分区
+  <pre><kbd>mkfs.ext4 -L "home" /dev/mapper/chris-home</kbd></pre>
+  默认swap是没有激活的我们需要激活swap分区
+  <pre><kbd>swapon -v /dev/mapper/chris-swap</kbd></pre>
+  并且，根据手册，将根目录安装在预先存在的<code>/mnt/gentoo</code>挂载点(我们这里是Ubuntu Livecd)所以需要：
+  <pre><kbd>mkdir -pv /mnt/gentoo
+mount -v -t ext4 /dev/mapper/chris-root /mnt/gentoo</kbd></pre>
+  创建其他挂载目录
+  <pre><kbd>mkdir -v /mnt/gentoo/{home,boot}</kbd></pre>
+  挂载家目录
+  <pre><kbd>mount -v -t ext4 /dev/mapper/chris-home /mnt/gentoo/home</kbd></pre>
+  卸载usbkey
+  <pre><kbd>umount /tmp/boot </kbd></pre>
+  最后
+  <pre><kbd>blkid /dev/sdb1 /dev/sdc2
+/dev/sdb1: UUID="cc01504a-419f-4e87-b4a6-aea931a8a4d0" BLOCK_SIZE="1024" TYPE="ext2" PARTUUID="4097da9b-01"
+/dev/sdc2: UUID="e73a2a00-bc5a-4b29-8ab0-250349030c1f" TYPE="crypto_LUKS" PARTUUID="c54fd3e9-02"
+</kbd></pre>
+  注意这两个的UUID之后会在构建内核使用到
+</p>
+
+  </body>
+</html>
